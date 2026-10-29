@@ -1,0 +1,40 @@
+{
+  "category": "commercial_solar_installation",
+  "version": 1,
+  "reference_year": 2026,
+  "experience_window_years": 5,
+  "facts": [
+    {"id": "licence_held_by_bidder", "type": "boolean", "description": "The bidder itself holds an Ontario electrical contractor licence. False if the electrical work is subcontracted or the licence is deferred until after award."},
+    {"id": "licence_number", "type": "string", "description": "The licence number exactly as written in the proposal."},
+    {"id": "wsib_clearance", "type": "boolean", "description": "The proposal states that the bidder has current WSIB clearance."},
+    {"id": "liability_insurance_5m", "type": "boolean", "description": "The proposal states liability insurance of at least 5 million dollars."},
+    {"id": "qualifying_installs_count", "type": "integer", "description": "Number of commercial installations of 100 kW or more that the proposal says were completed. Use the figure as stated and do not add separate figures together."},
+    {"id": "installs_period_start_year", "type": "integer", "description": "First year of the period the installation count covers, when the proposal gives one. 'Since 2021' gives 2021. Null when no start year is given."},
+    {"id": "total_price_cad", "type": "number", "description": "Total price in Canadian dollars as stated, without symbols or separators."},
+    {"id": "completion_weeks", "type": "number", "description": "Weeks from award to completion. Only when the proposal commits to a duration. If the schedule is left open or depends on a later assessment, use status ambiguous with a null value."},
+    {"id": "panel_warranty_years", "type": "number", "description": "Length of the panel warranty in years."},
+    {"id": "workmanship_warranty_years", "type": "number", "description": "Length of the workmanship warranty in years."},
+    {"id": "named_project_lead", "type": "boolean", "description": "The proposal says the project lead or manager is named or already designated. False if the lead is to be assigned later."},
+    {"id": "crew_stated", "type": "boolean", "description": "The proposal describes a crew or gives a crew size."},
+    {"id": "safety_plan", "type": "boolean", "description": "A site safety plan is included or described."},
+    {"id": "monitoring_plan", "type": "boolean", "description": "Performance monitoring of the installed system is included. Progress reports during construction do not count."}
+  ],
+  "mandatory": [
+    {"id": "electrical_licence", "label": "Ontario electrical contractor licence", "facts": ["licence_held_by_bidder"]},
+    {"id": "wsib_and_insurance", "label": "WSIB clearance and $5M liability insurance", "facts": ["wsib_clearance", "liability_insurance_5m"]}
+  ],
+  "limits": [
+    {"id": "budget", "label": "Budget ceiling (CAD)", "fact": "total_price_cad", "max": 260000},
+    {"id": "schedule", "label": "Maximum duration (weeks)", "fact": "completion_weeks", "max": 16}
+  ],
+  "weighted": [
+    {"id": "experience", "label": "Relevant experience", "weight": 30, "method": "capped_ratio", "fact": "qualifying_installs_count", "params": {"full_marks_at": 10}},
+    {"id": "price", "label": "Price", "weight": 25, "method": "relative_min", "fact": "total_price_cad"},
+    {"id": "timeline", "label": "Timeline", "weight": 15, "method": "relative_min", "fact": "completion_weeks"},
+    {"id": "warranty", "label": "Warranty", "weight": 15, "method": "blended_cap", "facts": {
+      "panel_warranty_years": {"full_marks_at": 25, "share": 0.5},
+      "workmanship_warranty_years": {"full_marks_at": 12, "share": 0.5}
+    }},
+    {"id": "team", "label": "Team and approach", "weight": 15, "method": "checklist", "facts": ["named_project_lead", "crew_stated", "safety_plan", "monitoring_plan"]}
+  ]
+}
